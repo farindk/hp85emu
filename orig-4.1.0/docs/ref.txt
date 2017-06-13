@@ -1,0 +1,162 @@
+The HP-85 PROGRAM CONTROL BLOCK has this format:
+ BYTE#  DESCRIPTION              			OFFSET NAME
+ -----  ----------------------------------	-----------
+   0	NAME[0]
+   1	NAME[1]
+   2	NAME[2]
+   3	NAME[3]
+   4	NAME[4]
+   5	NAME[5]
+   6	program TYPE (see below)			P.TYPE
+   7	program LENGTH (2 bytes)			P.LEN
+  10
+  11	COM length or SUB RTN (2 bytes)		P.COM or P.SUBR
+  12
+  13	DATA line ptr (2 bytes)				P.DATL
+  14
+  15	DATA item ptr (2 bytes)				P.DATA
+  16
+  17	Reserved Mem Pointer (2 bytes)		P.RMEM
+  20
+  21	Active FOR/NEXT counter				P.FCNT
+  22	Active GOSUB counter				P.GCNT
+  23	not used
+  24	not used
+  25	Security bits						P.SFLG
+  26	Security code (2 bytes)				P.SCOD
+  27
+ MAIN program starts here
+  30	4 BCD digits LINE NUMBER (2 bytes)	P.GO
+  31
+  32	LENGTH of first BASIC line
+  33 	first token of first BASIC line		P.FIRS
+  
+The PROGRAM TYPE (byte 6 of the header above) is:
+  BIT	DESCRIPTION
+  ---	------------------------------------
+   0	Program type (0=MAIN, 1=SUBPROGRAM)
+   1	Program type (0=BASIC, 1=BINARY PROGRAM)
+   2	not used
+   3	not used
+   4	not used
+   5	Allocation (0=NOT allocated, 1=ALLOCATED)
+   6	Option base (0=OptionBase 1, 1=OptionBase 0)
+   7	COMMON flag (0=NO common, 1=COMMON block)
+
+The above info for the HP-87 is DIFFERENT and upside-down.
+Hopefully someday I'll have time to document it here.
+
+TAPE LAYOUT
+-------------------------------------------------------
+The HP-85 tape cartridges contained at most 43 files.
+File 0 was always the TAPE DIRECTORY, and was always
+4 records long.  Files 1-42 were the user-created files.
+The tape itself had 2 TRACKS, 0 and 1.
+
+There were TWO COPIES of the TAPE DIRECTORY, one in
+records 0 and 1 of file 0, and a second in records 2 and 3
+of file 0.  Record 2 was an exact duplicate of record 0,
+and record 3 was an exact duplicate of record 1.  Only
+one record of the directory could be read into memory at
+a time, so the system had to keep track of whether the
+first 1/2 or the second 1/2 of the directory was in memory
+(or neither).
+
+Each DIRECTORY RECORD consisted of 21 12-byte directory
+entries, which equals 252 bytes.  The final 4 bytes of
+each record as follows:
+  252	directory segment flag (0 or 1).
+  253	FILE# of file that wraps from the end of TRACK 0 to
+  		the beginning of TRACK 1.
+  254	(2 bytes) RECORD# of first record of the split file
+  255		that's on TRACK 1.
+
+Each DIRECTORY ENTRY consists of 12 bytes, allocated thusly:
+  BYTES	DESCRIPTION
+  -----	---------------------------------------------
+  0-5	ASCII FILE NAME, blank filled
+  6		EXTENDED File Type
+  7		FILE TYPE
+  8-9	# RECORDS in the file
+  10-11	# BYTES in each record
+  
+The FILE TYPE is thus:
+  BIT	DESCRIPTION
+  ---	-----------------------------------------------
+   0	No directory name listed
+   1	Soft write protect
+   2	Extended file type (****)
+   3	Binary Program (BPGM)
+   4	Data file (DATA)
+   5	BASIC Program (PRGM)
+   6	Empty file (NULL)
+   7	Next available file
+   
+The most significant bit of the EXTENDED FILE TYPE byte will
+signify extended file type as well as BIT 2 of FILE TYPE, but
+it shouldn't be used, as a bug in the system doesn't clear that
+bit if you purge the file.  The lower seven bits allow the
+differentiation between various extended file types (****).
+
+DISK LAYOUT
+-------------------------------------------------------
+The HP-85/87 disks used the LIF (Logical Interchange Format) disk
+layout.  The first sector on the disk (cylinder 0, head 0, sector 0)
+contained the VOLUME sector.  The important things in the VOLUME
+sector were thus:
+
+  BYTE	DESCRIPTION
+  ----	-----------------------------------------------
+    0	Disc ID, always 0x80
+    1	Disc ID, always 0x00
+  2-7	6-character volume LABEL
+  8-9	always 0
+   10	upper byte of sector# of START of DIRECTORY
+   11   lower byte of sector# of START of DIRECTORY
+   12   always 0x10 (HP 3000 constant)
+   13	always 0
+  14-17 always 0
+   18	upper byte of # of sectors in DIRECTORY
+   19   lower byte of # of sectors in DIRECTORY
+  255	used by the HP-85 emulator to hold "write-protect" status
+  
+Each directory sector held 8 32-byte directory entries.  Each entry
+contained these values:
+
+  BYTE	DESCRIPTION
+  ----	------------------------------------------------
+  0-9	10-character file name (blank filled)
+  10	upper byte of file TYPE (see below)
+  11	lower byte of file TYPE
+  12-15	START of FILE (most signicant byte first)
+  16-19	LENGTH of FILE in sectors (most significant byte first)
+  20-25	file CREATION DATE
+  26	always 0x80
+  27	always 0x01 entire file is on this volume
+  28	lower byte of # of BYTES in this FILE
+  29	upper byte of # of BYTES in this FILE
+  30	lower byte of BYTES per LOGICAL RECORD
+  31	upper byte of BYTES per LOGICAL RECORD
+  
+Note that MOST values in LIF discs' VOLUME and DIRECTORY
+sectors are stored in "big-endian" format (most significant
+byte first, least significant byte last).  The Series 80
+CPU was "little-endian", it stored the least significant
+byte first (at the lower address) and the most significant
+byte last (at the upper address).  That's why the last two
+entries in the directory entries (bytes/file and bytes/record)
+were stored in byte-reversed order from the other "official"
+LIF values.
+
+The file TYPE value was:
+
+ byte 1	byte 2	Meaning
+ ------	------	------------------------------------------
+  0x00	 0x00	(WORD value of 0) PURGE'd file
+  0xFF	 0xFF	(WORD value of 0xFFFF=-1) NEXT available file
+  0x00	 0x01	(WORD value of 1) LIF ASCII file
+  0xE0	 0x04	Capricorn **** extended file type (ASSM, GRAF)
+  0xE0	 0x08	Capricorn BPGM file
+  0xE0	 0x10	Capricorn DATA file
+  0xE0	 0x20	Capricorn PROG file
+

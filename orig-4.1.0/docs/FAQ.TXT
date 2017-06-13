@@ -1,0 +1,26 @@
+HP-85 Emulator Frequently Asked Questions
+=========================================
+
+SECTION I: GENERAL
+------------------
+1) Q:	Is there an opcode I can put into a binary program that I'm writing
+        that, when executed, will cause the emulator to break into DEBUG
+        mode?
+   A:	Yes, put:
+            BYT 336
+        in your BPGM source code file where you'd like the emulator to
+        automatically break.  336 is normally a NOP instruction in the
+        Capricorn CPU, but the 3.5.1 and greater emulator has been
+        modified to automatically break into debug mode when it tries
+        to execute that instruction.
+
+If you have questions for me, write to:
+
+   email: 	everett@kaser.com
+    mail:	EVERETT KASER
+  			POB 403
+  			ALBANY OR 97321-0117
+  			USA
+
+or phone:	1-541-928-5259 (Pacific Time... it won't do you any good to call 
+							while I'm asleep, as I won't hear it.)

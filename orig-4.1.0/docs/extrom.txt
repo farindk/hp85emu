@@ -1,0 +1,458 @@
+***************************************************************************
+*                                                                         *
+*                                                                         *
+*                HP-86/87    Extension ROM    Pocket Guide                *
+*                                                                         *
+*                    (c) November 1982    Everett Kaser                   *
+*                                                                         *
+*                        Revision 9.1  January 1983                       *
+*                                                                         *
+*                                                                         *
+***************************************************************************
+
+     The HP-86/87 Extension Rom is an 8K external rom that adds several
+significant and not so significant capabilities to the basic computer.
+These added capabilities fall into three general groups:
+
+    1) CRT and keyboard initialization
+    2) Assembler ROM extension
+    3) BASIC language extensions
+
+For the most part, if any of the features are not of any particular
+interest, they can be ignored, but the features in group 1) are not some
+of these. If you don't like those, tough; the solution is easy: dont't
+put the ROM in your machine. See how easy that was.
+
+1) CRT and keyboard initialization
+
+    a) at power-on, the display is put into ALPHALL mode and PAGESIZE 24.
+       You will notice that when you turn your machine on, the cursor
+       will blink on for a moment and then it will go away for a while
+       before returning. This is normal; do not return your ROM for service.
+
+     b) at power-on, the definitions of the calculator mode softkey typing
+        aids are redefined to:
+
+        K1  PRINTER IS
+        K2  FIND LABEL "
+        K3  ::701"
+        K4  AUTO
+        K5  SCRATCH
+        K6  LOAD  "
+        K7  STORE "
+
+        K8  ASSEMBLER
+        K9  FREFS "
+        K10 ::700"
+        K11 COMMAND
+        K12 SCRATCHBIN
+        K13 LOADBIN  "
+        K14 STOREBIN "
+
+    K3 and K10 may vary depending upon the address of your default
+disk drive at power-on. If your disk drive is turned off, they will be
+::301 and ::300. Otherwise, they will be whatever the default MSUS is and
+one higher than the default.
+
+    If you go into ASSEMBLER mode, the Extension ROM will redefine
+some of the softkeys, but not all. This is how the keys are defined in
+Assembler mode:
+
+        K1  ASSEMBLE "
+        K2  FLABEL "
+        K3  ::701"
+        K4  AUTO
+        K5  SCRATCH
+        K6  ALOAD  "
+        K7  ASTORE "
+
+        K8  BASIC
+        K9  FREFS "
+        K10 ::700"
+        K11 COMMAND
+        K12 SCRATCHBIN
+        K13 LOADBIN  "
+        K14 STOREBIN "
+
+**** NOTE ****
+
+     For nefarious reasons, these key assignments are made each and every
+time that a SCRATCH occurs (which happens when you switch between BASIC and
+ASSEMBLER modes). Because of this, it can be very frustrating trying to
+define some of these softkeys to be something else using the ON KEY
+statement. However, the only keys that are defined by the Extension ROM at
+any time other than at power-on on are the ones that are different in BASIC
+and ASSEMBLER modes. Hence, the others CAN be redefined by you without fear
+of having them redefined out from under you. These safe keys are:
+
+        K3  ::701"
+        K4  AUTO
+        K5  SCRATCH
+        K9  FREFS "
+        K10 ::700"
+        K11 COMMAND
+        K12 SCRATCHBIN
+        K13 LOADBIN  "
+        K14 STOREBIN "
+
+That about covers it for CRT and keyboard initialization.
+
+***************************************************************************
+
+2) ASSEMBLER mode extensions
+
+    The Assembler mode extensions consist of five new pseudo-opcodes and
+one 'feature' (here 'feature' is used in the good sense of the term; there
+are several 'features' in the ROM of the bad sort, also).
+
+    a)  LOC <absolute address>
+
+    This pseudo-opcode can only be used in a program which has
+been declared as being an ABSolute program. Otherwise, you will get the
+error message: Rel LOC. What this assembler instruction does is advance the
+assembly address counter to a fixed absolute address. This is useful when
+you want a routine or piece of code to always start at a fixed address,
+regardless of how the code in front of it expands or contracts. What the
+Assembler does when it encounters the LOC instruction is fill the object
+code with zeroes until the address counter reaches the required value. If
+the specified address is lower than the current assembly address counter
+you will get this error message: Neg LOC.
+
+        example:   1000          LOC 65700
+
+    b)  BOX [number of open lines]
+
+    BOX is a more of a typing aid than a pseudo-opcode because of
+the fact that it doesn't survive parsing. When you type BOX and press
+END-LINE, the parse routine changes it into a box of asterisks suitable for
+putting comments in or simply used as a divider in the source code. You can
+optionally include a line count to control how large the box will be. The
+line number that you enter the BOX instruction on will changed into a solid
+row of asterisks followed by a number of rows of two asterisks seperated by
+spaces, followed by another solid row of asterisks. The number of 'hollow'
+rows is determined by the optional parameter (the default is three). If the
+computer is not in AUTO line numbering mode, the BOX instruction will put
+it in that mode with a line increment value of one, for purposes of
+numbering the successive lines of the box. The first line is actually
+entered into the source code, but the others are simply displayed on the
+CRT, so the END-LINE key must be pressed on each of the other lines to
+actually enter them into the source code. If all this is perfectly muddy,
+the easiest thing to do is just try it and then it will all become
+perfectly oblivious. (I'm getting numb.) By the way, at least two spaces
+must be between the line number and the BOX instruction or, otherwise, it
+will be taken as a label and you will get an opcode error.
+
+        example:  1000   BOX
+
+        is turned into:
+
+                  1000 ! *******************************
+                  1001 ! *                             *
+                  1002 ! *                             *
+                  1003 ! *                             *
+                  1004 ! *******************************
+
+        with the cursor sitting over the exclamation point after line
+        number 1001.
+
+    c)  HED <string>[,number of lines per page]
+
+    The HED instruction is used to put headings on your assembly time
+listings. The headings will consist of the following information:
+              1) the name of the source code file
+              2) the name of the object code file
+              3) the date of the assembly
+              4) the time of the assembly
+              5) the string from the most recent HED statement
+              6) the page number
+    The date and time come from reading the system timer, so if
+it hasn't been set properly, then you headings won't have the proper date
+and time (see how simple this is?).  To simplify this proccess, one of the
+BASIC extensions is a SET CLOCK command that allows you to set the system
+timer in a way that a simple human can understand (as opposed to a simple
+computer). The optional parameter specifies how many lines fit on a page of
+paper in your printer. The default is 60 (decimal). For most printers, this
+is the standard, but if you want fewer lines printed per page or your
+printer is different, this allows you to be different.
+    By the way, the HED instruction is a NOP if LST isn't turned
+on at the time the HED is encountered (and remember, this is only at
+assembly time, not for PLISTs!).
+
+    d)  ADR
+    
+    ADR is another pseudo-opcode that doesn't stick around long
+(similar to BOX). The Extension ROM has included in it a small global table
+of about 130 most commonly used system labels and their associated values.
+ADR allows you to access this 'label table' as you're typing in source
+code. What you do is type a line number followed by a label, a space, and
+ADR; then press END-LINE. The Extension ROM will look up the label in the
+table and replace ADR with DAD and the value of the label. If the label
+wasn't in the table, it will return a value of zero. Following is a list of
+the labels that are in the Extension ROMs table:
+     ACTMSU      DFLAG       GINTEN      NXTMEM      ROMFL
+     ALFAL.      DIGIT       GRAFA.      ONEB        ROMJSB
+     ALPHA.      DISP.       GRAPH.      ONEI        ROMRTN
+     ASSIG.      DNCURS      HLFLIN      ONER        ROMTAB
+     BINTAB      DRV12.      HMCURS      ONEX        RSELEC
+     BYTCRT      EMOVDN      INCHR       OUTCHR      RTCURS
+     CHIDLE      EMOVUP      INPBUF      OUTSTR      SAD1
+     CHKSTS      EOJ2        IOTRFC      PAGES1      SAVER6
+     CLEAR.      ERRBP#      KEYCOD      PAGES2      SAVPT2
+     CONBI3      ERROR       KEYHIT      PRINT.      SCAN
+     CONBIN      ERROR+      KEYSTS      PRSTR.      SCTEMP
+     COUNTK      ERRORS      KYIDLE      PTR1        ST240+
+     CRTBAD      FETSVA      LAVAIL      PTR1+       STBEEP
+     CRTBYT      FILTYP      LWAMEM      PTR1-       STOST
+     CRTDAT      FNAM        LSTDAT      PTR1-+      STOSV
+     CRTRAM      FNAM+5      LTCURS      PTR2        STREX+
+     CRTSAD      FNDLIN      MOVDN       PTR2+       STREXP
+     CRTSTS      FWBIN       MOVUP       PTR2-       STRREF
+     CURS        FWCURR      MSBASE      PTR2-+      STSIZE
+     CVNUM       FWPRGM      MSCRE.      PUTSEC      SVCWRD
+     DCDFIL      FWUSER      MSPRNT      RDSTR.      TAPDS+
+     DCLIN#      GCHAR       MSPUR.      RECBUF      TOS
+     DCSLOP      GCLR.       MSROM#      REFNUM      TWOB
+     DECODE      GETCMA      NUMVA+      RELMEM      UPCURS
+     DECUR2      GETSEC      NUMVAL      RESMEM      ZROMEM
+     DEFMSU      GINTDS      NXTDAT      RMIDLE
+
+    e)  ADS [octal rom number]
+
+    ADS is kind of a cross between declaring a global file with
+the GLO command and using the ADR command. What you do is this: place ADS
+at the beginning of your source code. Then, every time you assemble that
+source code, then entire label table you saw described only moments ago
+under the ADR statement will be appended to the assembly time label table
+in memory. So, it will be just as if you had all those labels declared
+right in your source code (except that only the ones that will show in the
+alphabetized label table listing will be the ones you actually used). (No,
+we haven't discussed that yet, so don't worry about it.)
+    The optional rom number allows for future expansion of this
+label-table-in-ROM by the addition of more ROMS with tables in them. But
+I'm not telling you how to do that and none exist right now, so forget it;
+just use ADS without any parameter.
+    NOTE: you can use a global file at the same time and an ADS
+statement and have labels declared in your source code, also, but if there
+is a duplicate between the ADS table and the labels declared in your source
+code, you will get a DUPLICATE LABEL error.
+
+    f)  Alphabetized label table listing at FIN time
+
+    If LST is on at assembly time when the FIN statement is
+encountered and there were no errors in the assembly, then the Extension
+ROM will print out an alphabetized label table of all labels used in the
+program, whether the label was a DAD, EQU, or a LCL (local) label, and the
+value associated with the label.
+    NOTE: Any labels used that were generated through use of the
+ADS statement will show as type DAD. Also, if an ADS statement was used,
+only those labels that were actually referenced will show in the printed
+table.
+
+
+And that's it for the Assembler Extensions!
+
+***************************************************************************
+
+3) BASIC mode extensions
+
+    a)  COMMAND [line index]
+
+    This command allows you to have program specific typing aids
+that change with the programs. i.e., when program "TEST" is in memory, it
+might type STORE "TEST", but when program "PASSED" is in memory, it would
+type STORE "PASSED". The way it works is this: put the string you want
+typed on a line of your program as a comment (the first line is best for
+the most commonly used string). Then when you execute COMMAND, the COMMAND
+display will be replaced by the string that is the comment, leaving the
+cursor at the end of the string on the CRT. This is really a pretty poor
+explantion, but it's much easier to see than to describe. However, ....
+if COMMAND is executed without a parameter, the first line of the program
+is used. If a parameter is used, then then n-th line of the program will be
+used. (i.e., COMMAND with no parameter is the same as COMMAND 1).
+NOTE: the parameter is NOT a line number, it is a line count! Softkey K11
+is a typing aid for the keyword COMMAND.
+
+    b)  SET CLOCK
+
+    Allows you to set the system timer in an easy, human-readable
+manner. Puts you temporarily into a limited editor mode while you input the
+date and time. The date is in the format MM/DD/YY and the time is in the
+HH:MM:am/pm format, where 12:00:am is midnight, and 12:00:pm is noon. (the
+am or pm can be upper or lower case). Once these inputs have been made with
+no mistakes, the computer falls back into normal operating mode.
+
+    c)  CLOCK
+
+    Does basically the same thing as the system TIME function (or
+perhaps more appropriately, the AP ROMs TIME$ function) except it returns
+the system time in a human readable format, such as HH:MM am/pm. It is a
+string function with no parameters.
+
+    d)  THE DATE
+
+    Does basically the same thing as the system DATE function (or
+perhaps more appropriately, the AP ROMs DATE$ function) except it returns
+the system date in a human readable format, such as MM/DD/YY. It is a
+string function with no parameters.
+
+    e)  RSECTOR <string variable>,<sector number>,<MSUS>
+
+    Reads a raw sector of bytes from the disk at <MSUS> and
+stores the information into <string variable>. <string variable> should be
+dimensioned to at least 256 bytes long or a string overflow error will
+occur.
+
+    f)  WSECTOR <string expression>,<sector number>,<MSUS>
+
+    Writes to a sector on the disk at <MSUS>. <string expression>
+should generally be 256 bytes.
+
+    g)  FLAST
+
+    Finds the last line of a program, displays that line on the
+CRT, and leaves the list pointer pointing to that last line.
+
+    h)  BOX [number of open lines]
+
+    See the description of BOX under Assembler mode extensions.
+The only difference is that in BASIC mode, the parameter is a decimal value
+and in Assembler mode the parameter is an octal value.
+
+    i)  FIND LABEL <string expression>
+
+    Is BASIC modes corresponding command for FLABEL in Assembler
+mode. Finds a BASIC program label, displays the line on the CRT, and leaves
+the list pointer pointing to that line.
+
+    j)  EXEC <file name>
+
+    Causes the specified EXEC file to start delivering keycodes
+to the operating system just as if someone were typing those keys from the
+keyboard. The EXEC file is set up using the ESTORE command. Any time the
+computer is idling (i.e., a program or calculator statement is not
+executing) the next key from the file will be fed to the system to be
+executed (sounds bloody awful). Also, any time the system is waiting in an
+INPUT statement for keyboard input, the next key will be taken from the
+EXEC file and fed to the system. Thus, the EXEC files can be used to
+automatically run demonstration programs, loading them, running them,
+supplying inputs to them, so on and so forth. Anything you can do from the
+keyboard, an EXEC file can do just as well, except for repeating keys,
+although the EXEC file can simulate it by repeatedly hitting the same key.
+The EXEC file shows in the directory as type: exec.
+
+    k)  ELOAD <file name>
+
+    This is a string function that reads the contents of the
+specified EXEC file and returns those contents as a string.
+
+    l)  ESTORE <file name>,<string expression>
+
+    This statement is very similar to a normal STORE statement
+except that it creates an 'exec' type file and what it stores in that file
+is the <string expression>. It stores over a file, purges the file and
+creates a new one if the old one is too small, etc. just like STORE.
+
+    m)  EEDIT (<string expression>)
+
+    This is a string expression that puts you into a peculiar
+type of edit mode. In this mode, any key you press is displayed at the
+cursor location. The only way to exit this mode is to press the space bar
+while holding the shift key down. This gets you into the edit-edit mode in
+which all keys are disabled except for a few for cursor movement and such.
+While in edit-edit mode, K7 will terminate the edit session and whatever
+you had typed will be returned as the string value of the EEDIT function.
+Also, while in edit-edit mode, pressing the shift-space-bar will get you
+back into the 'edit' mode where you can enter more keycodes. For keycodes
+that display strangely, such as ENDLINE, RUN, softkeys, etc. there is a
+small mnemonic window at the bottom left of the screen that shows what
+those keys are while the cursor is positioned over a keycode. The use of
+this function together with ESTORE and ELOAD allows you to relatively
+easily create and edit 'exec' files. A complex example of these commands
+is:
+    ESTORE "TEST", EEDIT (ELOAD ("TEST"))
+
+This will first ELOAD file "TEST" and pass it as a string argument to
+EEDIT. EEDIT will go into the 'edit' mode, allowing you to edit the string.
+Then, when you exit the EEDIT, the resulting string from the EEDIT will be
+passed to ESTORE as the argument to be restored back into "TEST". The way
+to create a new 'exec' file from scratch would be similar:
+
+    ESTORE "TEST", EEDIT ("")
+
+This would first go into EEDIT with a blank sheet (from the null string).
+Once you'd created the string of keycodes you wanted and exited EEDIT, that
+string would be passed to ESTORE to be stored into a file called "TEST".
+
+    n)  MSI <string expression>
+
+    This is naught but a typing aid for MASS STORAGE IS.
+
+    o)  DUMP PAGE
+
+    Dumps the current alpha page of the CRT to the declared
+external printer. All highlighting and all control characters are stripped.
+
+    p)  DUMP ALL
+
+    Dumps all of alpha CRT memory to the declared external
+printer. All highlighting and all control characters are stripped.
+
+    q)  DUMP ON <string expression>
+
+    Takes the first two characters of <string expression> to
+represent keycodes to be used as DUMP PAGE and DUMP ALL keys. (i.e., when
+you press those keys, the appropriate screen-to-printer copy will occur.)
+<string expression> must be exactly two characters long.
+
+    r)  DUMP OFF
+
+    Releases the two keys that were declared with DUMP ON.
+
+    s)  ADR (<string expression>)
+
+    A numeric function that returns the address associated with
+the label represented by <string expression> if that label exists in the
+internal table.  See ADR under Assembler mode extensions. This function
+returns -1 if the label is not found in the internal table.
+
+    t)  REPLACE <str. exp.> WITH <str. exp.> [SHOW or VERIFY]
+                     [,starting line number [,ending line number]]
+
+    Performs a search and replace operation (on both BASIC and
+ASSEMBLER code). If SHOW is specified, then each time the first <str. exp.)
+is found, the line will be displayed with the <str. exp.> highlighted.  If
+VERIFY is specified, a SHOW will be done and the ROM will wait for you to
+verify if you want that instance replaced. Pressing the 'N' or 'n' keys
+will cause it to not be replaced, any other key will cause it to be
+replaced. Once you have pressed a key, the ROM will continue its search for
+the next instance.  If a starting line number is specified the search will
+begin at that line or the next highest line number if the specified one
+doesn't exist. If an ending line number is specified, the search will halt
+at that line number or the next lowest if the specified one doesn't exist.
+
+And that's it for BASIC mode extensions.
+
+***************************************************************************
+
+CURRENT KNOWN BUGS
+
+1)  If you're using an 86 and an Epson printer hooked up to the 86's
+    parallel printer interface, and you do an Assembly time listing using
+    HED statements, and a HED statement causes the paper to form-feed for
+    more than about half of a sheet, you'll get a time-out error. This
+    is caused by the 86's printer interface. It can be duplicated from
+    BASIC by doing: PRINT CHR$(12)&"ABC".
+
+    Current work-around: Either a) don't use an 86
+                                b) don't use an Epson
+                                c) don't use HED statements
+                                d) quit programming in Assembly language
+                             or e) quit using the Extension ROM
+
+2)  There are some apparent problems with REPLACE. They have not yet been
+    well enough documented, though, to document here. So there.
+
+There's been a couple of other problems reported, but not with enough
+details or repeatability to be worth noting here. I'd be happy to entertain
+any problems or suggestions you might have, just don't expect a lot to be
+done about them. Happy fugging.

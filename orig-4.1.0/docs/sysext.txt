@@ -1,0 +1,125 @@
+Everett Kaser
+February 2015
+
+Besides my own Extension ROM, there is another 'unofficial' ROM included in
+the 3.0 release of the Series 80 Emulator: Andre Koppel's System Extension
+ROM.  Here, in his own words (from his blog at http://blog.akso.de on
+June 27, 2013) is the story of his ROM:
+
+===========================================================================
+I am working with computers since the late seventies. My first own computer
+was a HP86b from Hewlett Packard. I have needed a long time to collect all
+the money to purchase such a fully featured HP-System. For the HP86 I have
+written several commercial programs. A word processing system that was sold
+very often, a statistical system (sold sometimes), several big programs to
+drive testing units and several binaries. Writing binaries for the
+HP-Series 80 computers was a pleasure because the build in BASIC language
+could be expanded with new BASIC words. To do so, for every new BASIC word
+a definition must be given, sometimes a parser must be written and a at
+least the functional code must be written. If every thing was done well,
+the BASIC language was extended with a completely new functionality. I 
+remember, sometimes a was a real hack to find the system internals needed
+to write advanced language extensions. All the code was written in HP Series
+80 assembler.
+
+One of my best language extensions was very usefull for nearly every user.
+I have expanded the system language by a great amount of essential commands.
+Because the language binary was very usefull I have translated the binary
+into ROM-code. Using a ROM-drawer a customer was able to install my custom
+ROM into a HP series 80 computer, expanding the system language without a
+need to load any additional binaries. I have given the name SYSEXT to this
+system ROM. And the word SYSEXT itself becomes a system language extension
+command. If someone enters SYSEXT into a computer equipped with my ROM, a
+copyright was shown on the screen.
+
+Now it’s nearly 30 years later and  I have given the code for the SYSEXT 
+ROM to public some years ago. Now an android emulator for the series 80 
+systems was build by Olivier de Smet. I have seen that the SYSEXT ROM was
+one of the preinstalled ROMs in the emulator. I have downloaded the emulator
+into my Galaxy S4, plugged in the ROM (not physically, activating it,
+switching it on within the emulator) and the language extensions are still
+present. So I have entered the command SYSEXT (the language extension
+command that simply shows a copyright) into the emulator. As expected,
+the emulator shows “(c) Andre Koppel Software 30.87?, a message from the
+past.
+
+Brand new technology (Android, Galaxy S4) makes it possible to emulate very
+old systems showing the details and persons who have worked decades in the
+past with computers. This way I become part of the computer history. If
+someone likes to try the HP Series 80 computers, download the “go87? App
+from GooglePlay. The manuals of the system and several details can be
+found on several web sites.
+
+By the way, during the last 20 years I have written an emulator for the
+HP-Series-80 BASIC because it was a powerfull language, easy to learn. The
+BASIC language has become part of the ERP-System INVEP sold by my company.
+Sometimes a user writes own addons for our system using this language not
+knowing the history behind…
+===========================================================================
+
+And from Olivier De Smet's emulator's readme.txt file (go to the web page
+at https://sites.google.com/site/olivier2smet2/hpseries80 for his emulator),
+here are the keywords in the SYSEXT ROM:
+
+Some infos for HP86 Andre Koppel rom 070:
+
+ADR(String)            		converts a String to a number
+ADR$(Number)        		converts a number to a string
+AND$(String1,String2)
+AREAD Stringvar   		read screen contents to string
+AWRITE 				row,column,String
+BCAT Number             	shows the catalog of the binary with the given number
+BFLABEL Linemark        	searches within a program for the line that contains a
+				linemark with the given name
+BLANK$(count)
+BPGM?(Number)        		returns 1, if the binary with the given number was loaded
+BSET?(String,Bitmask)
+CBIT$(String,Bitmask)
+CHKSUM(String)
+C_RETURN                	removed all sublevel from the return stack
+O_D(Octal_Number)       	converts a octal number to decimal
+ODD(Number)             	return 1, if number is not even
+PEEK(Adr)               	returns octal coded byte from the given address (address must be
+given in octal)
+PEEK$(Adr,ROM_Number,count)     returns string with length "count" from base
+				address Adr (must be given in octal) from ROM (or system)
+POKE Adr,Byte        		Parameters ar octal
+POP RETURN                	removes one return level from stack
+RCAT ROM_Number        		shows the catalog of the statements and functions provided
+				by the ROM with the given number
+REGREP (String)        		converts string that is given in CPU-notation to Number
+REGREP$(Number)        		converts number to internal BCD CPU-notation
+REGREP$$(Number)  		same as REGREP$, but result is in octal (for assembler
+programming)
+RELEASE KEYBOARD
+REPLACE$(String1,String2)
+RESTOREX Number        		Like standard RESTORE, but also accepts a variable as Number
+REV$(String)
+ROM?(ROM_Number)        	Returns 1, if ROM was found within the system
+ROUND(Number,Pos)
+RPL$(String)        		changes characters within the string according to SET REPLACE$S
+RPT$(String,count)        	repeats a string
+RSECTOR String,Record_Number,MSUS$       reads records from disk
+SADR (String)        		returns starting address of string in RAM
+SBIT$ (String,Number)
+SCALL Adr[,ROM]        		jumps directly to the machine code at the given address
+(octal)
+SCALL String        		processes machine code within string
+SET ERRBR                 	reactivates old ON ERROR
+SET REPLACE$ String1,String2
+SETPTR2 Adr,Value        	Loads 2-Byte PTR2 value
+SETPTR3 Adr,Value 		Loads 3-Byte PTR2 value
+SORT String,Substringlen,start,end
+START CRT AT row        	starts screen at given row
+TAKE KEYBOARD
+TOKEN EXECUTE String 		executes a previously tokenized BASIC-command stat is
+				stored within the string
+TOKEN$ (String)        		parses and converts the BASIC commands given within the
+				string for further use with TOKEN EXECUTE
+TRIM$ (String)
+UNMASK                		demasks keyboard
+WSECTOR String,record,MSUS      like rsector
+XOR$(String1,string2)
+
+There are several other commands within the ROM for structured programming.
+(use RCAT or given listing of roms)
