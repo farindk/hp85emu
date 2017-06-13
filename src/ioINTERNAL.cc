@@ -885,7 +885,7 @@ void HP85InvalidateCRT(int Model) {
 	}
 };
 
-#if TODO
+
 //************************************************
 // This is used when only one BYTE of the HP-85 CRT needs to be redrawn
 // (to speed things up.  Redrawing the whole CRT everytime, while easier
@@ -911,7 +911,11 @@ void HP85InvalidateCRTbyte() {
 		cp = (col==63)?4:8;	// only do 4 pixels if we're starting in the last nibble on the right
 		for(i=0; i<cp; i++) {
 			clr = (c & (0x0080 >> i)) ? CRTbrightness : CLR_BLACK;
-			PointBMB(hp85BM, 4*col+i, 192+row, clr);
+
+			// REPLACED PointBMB(hp85BM, 4*col+i, 192+row, clr);
+                        hp85BM->DrawPoint(4*col+i, 192+row, clr);
+
+#if TODO
 			if( !(IO_CRTCTL & 6) ) {	// if not wiped out or powered down
 				if( CfgFlags & CFG_BIGCRT ) {
 					PointBMB(KWnds[0].pBM, CRTx+8*col+2*i, CRTy+2*row, clr);
@@ -920,9 +924,12 @@ void HP85InvalidateCRTbyte() {
 					PointBMB(KWnds[0].pBM, CRTx+8*col+2*i+1, CRTy+2*row+1, clr);
 				} else PointBMB(KWnds[0].pBM, CRTx+4*col+i, CRTy+row, clr);
 			}
+#endif
 		}
+#if TODO
 		if( CfgFlags & CFG_BIGCRT ) KInvalidate(KWnds[0].pBM, CRTx +8*col, CRTy+2*row, CRTx+8*col+16, CRTy+2*row+2);
 		else KInvalidate(KWnds[0].pBM, CRTx+4*col, CRTy+row, CRTx+4*col+8, CRTy+row+1);
+#endif
 	} else {	// alpha
 		cp = (IO_CRTBAD-IO_CRTSAD)/2;
 		if( cp <0 ) cp += 2048;
@@ -930,21 +937,27 @@ void HP85InvalidateCRTbyte() {
 		row = cp/32;
 		col = cp%32;
 
-		RectBMB(hp85BM, 8*col, 12*row, 8*col+8, 12*row+12, CLR_BLACK, CLR_NADA);
+		// REPLACED RectBMB(hp85BM, 8*col, 12*row, 8*col+8, 12*row+12, CLR_BLACK, CLR_NADA);
+                hp85BM->FillRect(8*col, 12*row, 8,12, CLR_BLACK, CLR_NADA);
 
 		// handle even/odd CRTBAD addressing
 		if( f ) cb[0] = ((CRT[IO_CRTBAD/2] & 0x0F)<<4) | ((CRT[IO_CRTBAD/2+1]>>4) & 0x0F);
 		else cb[0] = CRT[IO_CRTBAD/2];
 
 		cb[1] = 0;
-		Label85BMB(hp85BM, 8*col, 12*row, 8, (BYTE *)cb, 1, CRTbrightness);
+		// REPLACED Label85BMB(hp85BM, 8*col, 12*row, 8, (BYTE *)cb, 1, CRTbrightness);
+                hp85BM->Label85(8*col, 12*row, 8, (uint8_t*)cb,1, CRTbrightness);
 
+#if TODO
 		if( CfgFlags & CFG_BIGCRT ) StretchBMB(KWnds[0].pBM, CRTx+16*col, CRTy+24*row, 16, 24, hp85BM, 8*col, 12*row, 8, 12);
 		else BltBMB(KWnds[0].pBM, CRTx+8*col, CRTy+12*row, hp85BM, 8*col, 12*row, 8, 12, FALSE);
+#endif
 	}
-	FlushScreen();
-};
+// REPLACED FlushScreen();
+hp85BM->Flush( IO_CRTCTL & 128 );
+}
 
+#if TODO
 //************************************************
 // This is used when only one BYTE of the HP-85 CRT needs to be redrawn
 // (to speed things up.  Redrawing the whole CRT everytime, while easier
@@ -1268,11 +1281,8 @@ BYTE ioCRTDAT85(WORD address, long val) {
 		} else {
 			CRT[IO_CRTBAD/2] = val;
 		}
-#if TODO
+
 		HP85InvalidateCRTbyte();
-#else
-                HP85InvalidateCRT(0); // TODO: Hack until we implemented the above
-#endif
 
 		IO_CRTBAD += 2;
 		if( IO_CRTCTL & 128 ) {	// graphics
