@@ -51,7 +51,7 @@ static KeyMapping keys_hp85[] = {
   { Qt::Key_Escape, 0226,0140,0226,0140 },
   { Qt::Key_Slash,  47,0173,47,0173 },
   { Qt::Key_Bar,   124,124,124,124 },
-  { Qt::Key_Minus, 55,0175,55,0175 },
+  { Qt::Key_Minus, 45,0175,45,0175 },
   { Qt::Key_Asterisk, 42,0176,42,0176 },
   { Qt::Key_Plus,     43,0177,43,0177 },
   { Qt::Key_F1,     0200,0204,0200,0204 },
@@ -100,7 +100,7 @@ static KeyMapping keys_hp85[] = {
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
   fprintf(stderr,"keypress %c %x, modifier: %x\n",event->key(), event->key(),
-          event->modifiers());
+          (int)event->modifiers());
 
   bool shiftPressed   = !!(event->modifiers() & Qt::ShiftModifier);
   bool controlPressed = !!(event->modifiers() & Qt::ControlModifier);
