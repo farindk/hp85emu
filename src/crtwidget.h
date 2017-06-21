@@ -5,7 +5,7 @@
 #include <QWidget>
 #include <QPainter>
 
-#include "bitmap.h"
+#include "bitmap_qt.h"
 
 
 class CrtWidget : public QWidget, public Bitmap
