@@ -18,6 +18,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <assert.h>
+#include <stdlib.h>
 
 
 static int RamSizes[3]={32, 32, 32};
