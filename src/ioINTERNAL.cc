@@ -323,7 +323,7 @@ void NewTape() {
 	TAPBUF[0][0] = TAPREV;
 	TAPBUF[0][1] = 0010;		// write-enabled
 	*((DWORD *)&TAPBUF[0][2]) = TAPPOS;	// tape position
-	IO_TAPSTS = 0250;
+	IO_TAPSTS = 0250;  // tape is write enabled
 	IO_TAPCART = 1;			// signify cartridge inserted, not yet CAT'd
 	TAP_ADVANCE = FALSE;
 }
