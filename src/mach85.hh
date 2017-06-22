@@ -324,8 +324,6 @@ extern DWORD	RomListCnt;
 extern BOOL		CtlDown, ShiftDown;
 #if TODO
 extern DWORD	TraceLines;
-extern char		CurTape[64];
-extern BYTE		IO_TAPSTS, IO_TAPCART;
 extern char		FilePath[PATHLEN];
 extern PBMB		hp85BM;
 extern DWORD	MainWndClr, MainWndTextClr, MenuSelBackClr, MenuSelTextClr, MenuBackClr, MenuTextClr, MenuHiClr, MenuLoClr, PrintClr;

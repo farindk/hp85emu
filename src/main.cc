@@ -10,6 +10,7 @@
 #include "main.hh"
 #include "mach85.hh"
 #include "mainwindow.h"
+#include "tape.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -120,6 +121,10 @@ int main(int argc, char** argv)
   ui.create();
 
   machine.setConfig(CFG_AUTORUN);
+
+  strcpy(CurTape,"Standard Pak");
+  LoadTape();
+
   machine.HP85OnStartup();
 
   //QTimer::singleShot(0, []() { machine.HP85OnIdle(); });

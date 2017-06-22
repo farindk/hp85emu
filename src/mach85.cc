@@ -9,6 +9,7 @@
 #include "mach85.hh"
 #include "ioINTERNAL.hh"
 #include "ioDEV.h"
+#include "tape.h"
 
 #if TODO
 #include "beep.h"
