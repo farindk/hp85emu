@@ -3,6 +3,7 @@
 #define TAPE_H
 
 #include "config.h"
+#include "mach85.hh"
 
 // NOTE: the TAPEK below, which specifies the Kbytes length of a tape cartridge,
 // is not designed to be changed.  It was here to make my trial and error design
@@ -26,10 +27,53 @@
 BOOL LoadTape();
 
 extern char		CurTape[64];
-extern BYTE		IO_TAPSTS, IO_TAPCART;
 
 
-BYTE ioTAPSTS(WORD address, long val);
-BYTE ioTAPDAT(WORD address, long val);
+
+class HPMachine;
+
+
+
+class Tape
+{
+ public:
+  // TODO void Load(std::string filename);
+  // TODO void Save(std::string newFilename = "");
+
+ private:
+
+};
+
+
+class TapeDrive : public Peripheral
+{
+ public:
+  TapeDrive() { }
+
+  // Installs the tape drive into the machine (i.e. routes the IO addresses to this peripheral)
+  void install(HPMachine&);
+
+  void powerOn() { InitTape(); }
+
+  void InitTape();
+  bool LoadTape(); // TODO: remove me
+  // TODO void InsertTape();
+  void EjectTape();
+
+ private:
+  HPMachine* mMachine = nullptr; // the machine in which we are installed
+
+  uint8_t IO_TAPCTL;
+  uint8_t IO_TAPSTS, IO_TAPCART;
+  uint8_t IO_TAPDAT;	// byte written to TAPDAT, should be able to be read back from TAPDAT
+
+  void SetTapeStatus();
+
+  uint8_t readTAPDAT();
+  void    writeTAPDAT(uint8_t val);
+  uint8_t readTAPSTS();
+  void    writeTAPSTS(uint8_t val);
+};
+
 
 #endif

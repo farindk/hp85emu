@@ -201,7 +201,7 @@ void PWONinternal(int Model, bool first) {
 
 	if( Model<2 ) {
 		InitPRT85();
-		InitTape();
+		// InitTape();   DiFa: is now powered on as a Peripheral
 	}
 }
 

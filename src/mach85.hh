@@ -10,7 +10,8 @@
 
 #include "config.h"
 
-
+#include <functional>
+#include <vector>
 
 
 
@@ -40,6 +41,18 @@ enum HP85_Key {
 };
 
 
+class HPMachine;
+
+class Peripheral
+{
+public:
+  virtual ~Peripheral() { }
+
+  virtual void install(HPMachine&) { }
+  virtual void powerOn() { }
+};
+
+
 class HPMachine
 {
 public:
@@ -59,9 +72,20 @@ public:
 
   bool processKeyCode(HP85_Key key);
 
+  void addPeripheral(Peripheral* p) { mPeripherals.push_back(p);
+    p->install(*this);
+  }
+
+  void assignIO(uint16_t addr,
+                std::function<uint8_t ()>     readFunction,
+                std::function<void (uint8_t)> writeFunction);
+
 private:
   HPMachineModel Model = HP85A;
   uint32_t CfgFlags;
+
+  std::vector<Peripheral*> mPeripherals;
+
 
   // Memory map:
   // 0x0000 - 0x2000  System ROM 1 (8 kB)

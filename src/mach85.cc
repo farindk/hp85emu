@@ -127,7 +127,9 @@ static uint16_t	NC_BCD[256] = {
 // when READING, return value is the read byte value, when WRITING the return value is ignored
 static BYTE (*ioProc[256])(WORD address, long val)={
 	&ioGINTEN,&ioGINTDS,&ioKEYSTS,&ioKEYCOD,&ioCRTSAD85,&ioCRTBAD85,&ioCRTSTS85,&ioCRTDAT85,	// 177400
-	&ioTAPSTS,&ioTAPDAT,&ioCLKSTS,&ioCLKDAT,&ioPRTLEN,&ioPRCHAR,&ioPRTSTS,&ioPRTDAT,			// 177410
+	//&ioTAPSTS,&ioTAPDAT,
+	&ioNULL,&ioNULL, &ioCLKSTS,&ioCLKDAT,&ioPRTLEN,&ioPRCHAR,&ioPRTSTS,&ioPRTDAT,			// 177410
+
 	&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,	// 177420
 	&ioRSELEC,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,	// 177430
 	&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,	// 177440
@@ -159,6 +161,20 @@ static BYTE (*ioProc[256])(WORD address, long val)={
 	&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,	// 177760
 	&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL,&ioNULL	// 177770
 };
+
+static std::function<uint8_t ()> ioReadFunctions[256];
+static std::function<void (uint8_t)> ioWriteFunctions[256];
+
+
+void HPMachine::assignIO(uint16_t addr,
+                         std::function<uint8_t ()>     readFunction,
+                         std::function<void (uint8_t)> writeFunction)
+{
+  assert(addr >= 0177400);
+  ioReadFunctions [addr-0177400] = readFunction;
+  ioWriteFunctions[addr-0177400] = writeFunction;
+}
+
 
 extern int SkipInts;
 
@@ -284,7 +300,13 @@ void HPMachine::HP85PWO(bool first) {
 		if( IOcards[c].initProc != NULL ) IOcards[c].initProc(iR_RESET, Model, c, 0);
 	}
 #endif
+
 	PWONinternal(Model, first);
+
+        for (Peripheral* peripheral : mPeripherals) {
+          peripheral->powerOn();
+        }
+
 #if TODO
 	if( !first ) {
 		StoreDisAsmRecs();
@@ -361,7 +383,12 @@ void HPMachine::StoreMem(uint16_t addr, uint8_t val)
 
 	if( addr>=0177400 ) {	// I/O
 		if( addr!=0177500 ) {//addr<0177500 || addr>0177537 ) {//|| addr==0177530 || addr==0177531 ) {
-			ioProc[addr-(WORD)0177400](addr, val);
+                  if (ioWriteFunctions[addr-0177400]) {
+                    ioWriteFunctions[addr-0177400](val);
+                  }
+                  else {
+                    ioProc[addr-(WORD)0177400](addr, val);
+                  }
 		}
 #if TODO
  else if( addr==0177500 && GINTen() ) {	// ********************** INTRSC ***********************
@@ -424,8 +451,12 @@ uint8_t HPMachine::LoadMem(uint16_t addr)
   if (addr>=0177400)  {	// = 0xFF00 I/O
     if (addr>=0177400 && addr!=0177500) {//addr<0177500 || addr>0177537 ) {//|| addr==0177530 || addr==0177531 ) {
 
-      retval = (BYTE)ioProc[addr-(WORD)0177400](addr, -1);	// val<0 || val>255 means READ
-
+      if (ioReadFunctions[addr-0177400]) {
+        retval = ioReadFunctions[addr-0177400]();
+      }
+      else {
+        retval = (BYTE)ioProc[addr-(WORD)0177400](addr, -1);	// val<0 || val>255 means READ
+      }
     } else if (addr==0177500)  { // = 0xFF40 ********************** INTRSC ***********************
 #if TODO
       retval = IO_SC;

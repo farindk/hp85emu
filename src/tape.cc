@@ -7,10 +7,6 @@
 #include <algorithm>
 
 
-BYTE	IO_TAPCTL;
-BYTE	IO_TAPSTS, IO_TAPCART;
-BYTE	IO_TAPDAT;	// byte written to TAPDAT, should be able to be read back from TAPDAT
-
 WORD	TAPBUF[2][TAPEK*1024];	// 2 tracks, 128Kbytes / track (including GAPs, SYNCs, HEADERs, DATA, etc)
 DWORD	TAPPOS;		// current position of tap read/write head on the tape (ie, in TAPBUF)
 BOOL	TAP_ADVANCE;
@@ -37,7 +33,7 @@ char	CurTape[64];
 //********************************************************
 //========================================================
 
-void InitTape() {
+void TapeDrive::InitTape() {
 
 	IO_TAPSTS = 0240;	// note: OCTAL value
 	IO_TAPCART = 0;
@@ -63,18 +59,22 @@ void WriteTape() {
 		}
 	}
 }
+#endif
 
 //*********************************************************************
-void EjectTape() {
+void TapeDrive::EjectTape() {
 
-	if( Model<2 ) {
+  if( mMachine->getModel()<2 ) {
+#if TODO
 		WriteTape();
+#endif
 
 		IO_TAPSTS &= ~1;
 		IO_TAPCART = 0;
 	}
 }
 
+#if TODO
 #define	HOLE_LEN	2
 //**************************************************************
 void AddTapeHole(long p) {
@@ -118,13 +118,13 @@ void NewTape() {
 #endif
 
 //**************************************************************
-BOOL LoadTape() {
+bool TapeDrive::LoadTape() {
 
 	long		hFile;
 
-        int Model = getMachine()->getModel();
-
+        int Model = mMachine->getModel();
 	if( Model>= 2 ) return FALSE;
+
 	if( CurTape[0]==0 ) return FALSE;
 
 	// read TAPE file
@@ -360,29 +360,28 @@ void DrawTape(PBMB hBM, long tx, long ty) {
 //		if not GAP, clear GAP flag, else set GAP flag
 //		if tape data == 0, uninitialized area of tape, clear READY, GAP, HOLE, ILIM, and STALL
 
-#define	SetTapeStatus() {\
-				WORD	td;\
-				td = TAPBUF[IO_TAPCTL & 1][TAPPOS];\
-				if( td & TAP_HOLE ) IO_TAPSTS |= 0020;\
-				if( !(TAPPOS & 1) ) IO_TAPSTS |= 0100;\
-				else IO_TAPSTS &= ~0100;\
-				if( (IO_TAPCTL & 0006)==0006 ) {\
-					if( !(td & TAP_GAP) ) IO_TAPSTS &= ~0040;\
-					else IO_TAPSTS |= 0040;\
-					if( td==0 ) IO_TAPSTS = (IO_TAPSTS & 0111);\
-				}\
-			}
+void TapeDrive::SetTapeStatus()
+{
+  WORD	td;
+  td = TAPBUF[IO_TAPCTL & 1][TAPPOS];
+  if( td & TAP_HOLE ) IO_TAPSTS |= 0020;
+  if( !(TAPPOS & 1) ) IO_TAPSTS |= 0100;
+  else IO_TAPSTS &= ~0100;
+  if( (IO_TAPCTL & 0006)==0006 ) {
+    if( !(td & TAP_GAP) ) IO_TAPSTS &= ~0040;
+    else IO_TAPSTS |= 0040;
+    if( td==0 ) IO_TAPSTS = (IO_TAPSTS & 0111);
+  }
+}
 
 //*****************************************************************
 // 177410 TAPSTS
-BYTE ioTAPSTS(WORD address, long val) {
+void TapeDrive::writeTAPSTS(uint8_t val) {
 
-  int Model = getMachine()->getModel();
+  int Model = mMachine->getModel();
 
-	BYTE	i, w, retval=0;
-	long	dir;
+  BYTE	i;
 
-	if( val>=0 && val<256 ) {	// WRITE
 		if( Model<2 ) {
 			if( (IO_TAPCTL & 0340)==0 ) {	// not writing previously
 				if( (val & 0340)==0040 ) {	// starting a DATA write (no sync or gap)
@@ -411,7 +410,17 @@ BYTE ioTAPSTS(WORD address, long val) {
 				IO_TAPSTS |= 0200;	// set READY, always READY after power-up/down
 			} else IO_TAPCTL = val;
 		}
-	} else {
+}
+
+
+uint8_t TapeDrive::readTAPSTS()
+{
+  uint8_t retval=0;
+  long	dir;
+  uint8_t w, i;
+
+  int Model = mMachine->getModel();
+
 		if( Model<2 ) {
 			IO_TAPSTS = (IO_TAPSTS & 0251) | 0040;	// clear tach,hole,ilim,stall, set gap, leave alone write-enabled and tape-in-drive
 			if( (IO_TAPSTS | IO_TAPCART) & 1 ) {	// if tape in drive
@@ -470,17 +479,16 @@ BYTE ioTAPSTS(WORD address, long val) {
 			DrawTapeStatus(KWnds[0].pBM, TAPEx, TAPEy);
 #endif
 		}
-	}
+
 	return retval;	// READ
 }
 
 //*****************************************************************
 // 177411 TAPDAT
-BYTE ioTAPDAT(WORD address, long val) {
-	BYTE	i, w, retval=0;
+void TapeDrive::writeTAPDAT(uint8_t val) {
+  BYTE	i, w;
 
-	if( val>=0 && val<256 ) {	// WRITE
-          if( getMachine()->getModel()<2 ) {
+          if( mMachine->getModel()<2 ) {
 			i = IO_TAPDAT = val;
 
 			w = IO_TAPCTL & 0340;
@@ -503,8 +511,15 @@ BYTE ioTAPDAT(WORD address, long val) {
 			DrawTapeStatus(KWnds[0].pBM, TAPEx, TAPEy);
 #endif
 		}
-	} else {
-          if( getMachine()->getModel()<2 ) {
+}
+
+
+
+uint8_t TapeDrive::readTAPDAT()
+{
+  uint8_t retval=0;
+
+          if( mMachine->getModel()<2 ) {
 			// skipping GAPS/SYNCS, get next data byte (since we're supposed to be ready)
 			if( (IO_TAPCTL & 0006)==0006 ) {	// PWR-UP, MOTOR ON
 				while( !(TAPBUF[IO_TAPCTL & 1][TAPPOS] & (TAP_DATA | TAP_HOLE)) ) TAPPOS += (IO_TAPCTL & 0010) ? 1 : -1;
@@ -516,7 +531,20 @@ BYTE ioTAPDAT(WORD address, long val) {
 #if TODO
 			DrawTapeStatus(KWnds[0].pBM, TAPEx, TAPEy);
 #endif
-		}
-	}
+          }
+
 	return retval;	// READ
+}
+
+
+void TapeDrive::install(HPMachine& machine)
+{
+  mMachine = &machine;
+
+  machine.assignIO(0177410,
+                   std::bind(&TapeDrive::readTAPSTS,this),
+                   std::bind(&TapeDrive::writeTAPSTS,this,std::placeholders::_1));
+  machine.assignIO(0177411,
+                   std::bind(&TapeDrive::readTAPDAT,this),
+                   std::bind(&TapeDrive::writeTAPDAT,this,std::placeholders::_1));
 }

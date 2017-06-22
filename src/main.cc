@@ -58,7 +58,7 @@ Bitmap* Environment_Linux::createBitmap(int w,int h) const
 
 
 static HPMachine machine;
-
+static TapeDrive tapeDrive;
 
 HPMachine* getMachine()
 {
@@ -122,8 +122,9 @@ int main(int argc, char** argv)
 
   machine.setConfig(CFG_AUTORUN);
 
+  machine.addPeripheral(&tapeDrive);
   strcpy(CurTape,"Standard Pak");
-  LoadTape();
+  //tapeDrive.LoadTape();
 
   machine.HP85OnStartup();
 
