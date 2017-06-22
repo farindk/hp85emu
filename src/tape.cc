@@ -359,7 +359,7 @@ void TapeDrive::InsertTape(std::shared_ptr<Tape> tape)
 void TapeDrive::SetTapeStatus()
 {
   WORD	td;
-  td = (*mTape)[IO_TAPCTL & 1];
+  td = mTape->read(IO_TAPCTL & 1);
   if( td & TAP_HOLE ) IO_TAPSTS |= 0020;
   if( !(mTape->getTAPPOS() & 1) ) IO_TAPSTS |= 0100;
   else IO_TAPSTS &= ~0100;
@@ -384,7 +384,7 @@ void TapeDrive::writeTAPSTS(uint8_t val)
 					// if JUST starting write of DATA, make sure we're pointing at the
 					// next block of data, and not a GAP.
         do {
-          i = (*mTape)[IO_TAPCTL & 1];
+          i = mTape->read(IO_TAPCTL & 1);
           if( i & (TAP_DATA | TAP_HOLE) ) break;
           mTape->advance();    // skip ahead to first DATA or HOLE byte
         } while( TRUE );

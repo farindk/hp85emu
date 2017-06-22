@@ -42,7 +42,6 @@ class Tape
   bool Load(std::string filename);
   void Save(std::string newFilename = "") { } // TODO
 
-  uint16_t operator[](int head) { return TAPBUF[head][TAPPOS]; }
   uint16_t read(int head) { return TAPBUF[head][TAPPOS]; }
   void     write(int head, uint16_t data) { TAPBUF[head][TAPPOS] = data; }
 
