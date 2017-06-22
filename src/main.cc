@@ -123,8 +123,10 @@ int main(int argc, char** argv)
   machine.setConfig(CFG_AUTORUN);
 
   machine.addPeripheral(&tapeDrive);
-  strcpy(CurTape,"Standard Pak");
-  //tapeDrive.LoadTape();
+
+  std::shared_ptr<Tape> tape = std::make_shared<Tape>();
+  tape->Load("Standard Pak");
+  tapeDrive.InsertTape(tape);
 
   machine.HP85OnStartup();
 
