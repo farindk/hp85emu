@@ -37,11 +37,13 @@ class HPMachine;
 class Tape
 {
  public:
-  // TODO void Load(std::string filename);
-  // TODO void Save(std::string newFilename = "");
+  void Load(std::string filename);
+  void Save(std::string newFilename = "");
+
+  uint16_t operator[](int head);
 
  private:
-
+  std::string mFilename;
 };
 
 
@@ -60,12 +62,17 @@ class TapeDrive : public Peripheral
   // TODO void InsertTape();
   void EjectTape();
 
+  void setTapeStatusChangedCallback(std::function<void(TapeDrive&)> f) { mOnTapeStatusChanged=f; }
+
  private:
   HPMachine* mMachine = nullptr; // the machine in which we are installed
 
   uint8_t IO_TAPCTL;
-  uint8_t IO_TAPSTS, IO_TAPCART;
+  uint8_t IO_TAPSTS;
+  uint8_t IO_TAPCART;
   uint8_t IO_TAPDAT;	// byte written to TAPDAT, should be able to be read back from TAPDAT
+
+  std::function<void(TapeDrive&)> mOnTapeStatusChanged;
 
   void SetTapeStatus();
 
