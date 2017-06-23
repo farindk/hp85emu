@@ -26,6 +26,8 @@ public:
 
     void keyPressEvent(QKeyEvent *event);
 
+    QtTapeDrive* getQtTapeDrive() { return ui.tapeDrive; }
+
 private slots:
   void test() { printf("test\n"); }
   void quit() { printf("quit\n"); }

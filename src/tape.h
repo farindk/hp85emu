@@ -81,6 +81,9 @@ class TapeDrive : public Peripheral
 
   void setTapeStatusChangedCallback(std::function<void(TapeDrive&)> f) { mOnTapeStatusChanged=f; }
 
+  bool isPowerOn() const { return IO_TAPCTL & 0004; }
+  bool isCartridgeInserted() const { return (IO_TAPSTS | IO_TAPCART) & 1; }
+
  private:
   HPMachine* mMachine = nullptr; // the machine in which we are installed
 

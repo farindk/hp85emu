@@ -49,19 +49,29 @@ class EmulatorUI
 {
 public:
   virtual Bitmap* createCRTBitmap(int w,int h) const = 0;
+
+  virtual void connectToHPMachine(HPMachine*) = 0;
+  virtual void disconnectFromHPMachine(HPMachine*) = 0;
 };
 
 
 class EmulatorUI_Qt : public EmulatorUI
 {
 public:
+  EmulatorUI_Qt();
+
   virtual Bitmap* createCRTBitmap(int w,int h) const;
 
-  void create();
+  virtual void connectToHPMachine(HPMachine*);
+  virtual void disconnectFromHPMachine(HPMachine*);
+
+  //void create();
   void runIdle();
 
 private:
   class MainWindow* mMainWindow;
+
+  HPMachine* mMachine;
 };
 
 

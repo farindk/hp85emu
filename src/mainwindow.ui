@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>348</height>
+    <width>637</width>
+    <height>308</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,21 +30,36 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="CrtWidget" name="crt" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>320</width>
-          <height>240</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="Line" name="line">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="CrtWidget" name="crt" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>256</width>
+            <height>192</height>
+           </size>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+         </widget>
+        </item>
+        <item>
+         <widget class="QtTapeDrive" name="tapeDrive">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
@@ -63,8 +78,29 @@
         </item>
         <item>
          <widget class="QPushButton" name="quitButton">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Quit</string>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="default">
+           <bool>false</bool>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -79,7 +115,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>350</width>
+     <width>637</width>
      <height>25</height>
     </rect>
    </property>
@@ -92,6 +128,11 @@
    <extends>QWidget</extends>
    <header>crtwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QtTapeDrive</class>
+   <extends>QLabel</extends>
+   <header>qttapedrive.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

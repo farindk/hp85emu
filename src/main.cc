@@ -11,6 +11,7 @@
 #include "mach85.hh"
 #include "mainwindow.h"
 #include "tape.h"
+#include "qttapedrive.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,20 +74,33 @@ Bitmap* EmulatorUI_Qt::createCRTBitmap(int w,int h) const
 }
 
 
-static EmulatorUI_Qt ui;
+void EmulatorUI_Qt::connectToHPMachine(HPMachine* machine)
+{
+  tapeDrive.setTapeStatusChangedCallback(std::bind(&QtTapeDrive::updateDriveState,
+                                                   mMainWindow->getQtTapeDrive(),
+                                                   std::placeholders::_1));
+}
+
+void EmulatorUI_Qt::disconnectFromHPMachine(HPMachine* machine)
+{
+}
+
+
+static EmulatorUI_Qt* ui = nullptr;
 
 EmulatorUI* getUI()
 {
-  return &ui;
+  return ui;
 }
 
 #include <QApplication>
 #include <QTimer>
 
 
-void EmulatorUI_Qt::create()
+EmulatorUI_Qt::EmulatorUI_Qt()
 {
   mMainWindow = new MainWindow();
+
   mMainWindow->show();
 }
 
@@ -118,7 +132,7 @@ int main(int argc, char** argv)
   //MainWindow* win = new MainWindow;
   //win->show();
 
-  ui.create();
+  ui = new EmulatorUI_Qt();
 
   machine.setConfig(CFG_AUTORUN);
 
@@ -128,10 +142,12 @@ int main(int argc, char** argv)
   tape->Load("Standard Pak");
   tapeDrive.InsertTape(tape);
 
+  ui->connectToHPMachine(&machine);
+
   machine.HP85OnStartup();
 
   //QTimer::singleShot(0, []() { machine.HP85OnIdle(); });
-  QTimer::singleShot(0, []() { ui.runIdle(); });
+  QTimer::singleShot(0, []() { ui->runIdle(); });
 
   return app.exec();
 }
