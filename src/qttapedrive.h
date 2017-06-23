@@ -22,6 +22,15 @@ public:
       setPixmap(mPixmap[1][0]);
     }
 
+    void connectToTapeDrive(TapeDrive* td) {
+      mTapeDrive = td;
+
+      mTapeDrive->setTapeStatusChangedCallback(std::bind(&QtTapeDrive::updateDriveState, this,
+                                                         std::placeholders::_1));
+
+      updateDriveState(*td);
+    }
+
     void updateDriveState(TapeDrive& drive) {
       int power = drive.isPowerOn() ? 1 : 0;
       int cartridge = drive.isCartridgeInserted() ? 1 : 0;
@@ -31,7 +40,12 @@ public:
 
 private slots:
 
+protected:
+  void mousePressEvent(QMouseEvent* event);
+
 private:
+  TapeDrive* mTapeDrive = nullptr;
+
   QPixmap mPixmap[2][2]; // [cartridge][power]
 };
 

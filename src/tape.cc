@@ -60,6 +60,10 @@ void TapeDrive::EjectTape()
 
   IO_TAPSTS &= ~1;
   IO_TAPCART = 0;
+
+  if (mOnTapeStatusChanged) {
+    mOnTapeStatusChanged(*this);
+  }
 }
 
 
@@ -115,7 +119,8 @@ bool Tape::Load(std::string filename)
 
   // read TAPE file
   std::string FilePath = "tapes/" + filename;
-  FILE* fh = getEnvironment()->openEmulatorFile(FilePath);
+  //FILE* fh = getEnvironment()->openEmulatorFile(FilePath);
+  FILE* fh = fopen(filename.c_str(), "rb");
 
   printf("loading %s\n",FilePath.c_str());
 
@@ -345,6 +350,10 @@ void TapeDrive::InsertTape(std::shared_ptr<Tape> tape)
   IO_TAPSTS  = 0240 | mTape->getWriteEnableFlag();	// OR-in write-enable flag
   IO_TAPCART = 1;
   TAP_ADVANCE = FALSE;
+
+  if (mOnTapeStatusChanged) {
+    mOnTapeStatusChanged(*this);
+  }
 }
 
 

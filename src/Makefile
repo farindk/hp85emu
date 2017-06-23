@@ -7,7 +7,7 @@ CPPFLAGS=-fPIC `pkg-config Qt5Gui Qt5Widgets --cflags`
 CXXFLAGS=-std=c++11 -g -O0
 LIBS=`pkg-config Qt5Gui Qt5Widgets --libs`
 
-OBJS=main.o mach85.o ioINTERNAL.o bitmap.o moc_mainwindow.o moc_crtwidget.o mainwindow.o bitmap_qt.o tape.o moc_qttapedrive.o
+OBJS=main.o mach85.o ioINTERNAL.o bitmap.o moc_mainwindow.o moc_crtwidget.o mainwindow.o bitmap_qt.o tape.o moc_qttapedrive.o qttapedrive.o
 HEADERS=main.hh mach85.hh ioINTERNAL.hh bitmap.h mainwindow.h crtwidget.h ui_mainwindow.h bitmap_qt.h tape.h
 
 

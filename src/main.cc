@@ -76,9 +76,7 @@ Bitmap* EmulatorUI_Qt::createCRTBitmap(int w,int h) const
 
 void EmulatorUI_Qt::connectToHPMachine(HPMachine* machine)
 {
-  tapeDrive.setTapeStatusChangedCallback(std::bind(&QtTapeDrive::updateDriveState,
-                                                   mMainWindow->getQtTapeDrive(),
-                                                   std::placeholders::_1));
+  mMainWindow->getQtTapeDrive()->connectToTapeDrive(&tapeDrive);
 }
 
 void EmulatorUI_Qt::disconnectFromHPMachine(HPMachine* machine)
@@ -138,9 +136,11 @@ int main(int argc, char** argv)
 
   machine.addPeripheral(&tapeDrive);
 
+  /*
   std::shared_ptr<Tape> tape = std::make_shared<Tape>();
   tape->Load("Standard Pak");
   tapeDrive.InsertTape(tape);
+  */
 
   ui->connectToHPMachine(&machine);
 
