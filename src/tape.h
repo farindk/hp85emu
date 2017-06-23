@@ -83,6 +83,11 @@ class TapeDrive : public Peripheral
 
   bool isPowerOn() const { return IO_TAPCTL & 0004; }
   bool isCartridgeInserted() const { return (IO_TAPSTS | IO_TAPCART) & 1; }
+  int  getActiveHead() const { return IO_TAPCTL & 1; }
+  bool isMotorOn() const { return IO_TAPCTL & 0002; }
+  bool isForward() const { return IO_TAPCTL & 0010; }
+  bool isHighSpeed() const { return IO_TAPCTL & 0020; }
+  bool isWriting() const { return IO_TAPCTL & 0340; }
 
  private:
   HPMachine* mMachine = nullptr; // the machine in which we are installed
