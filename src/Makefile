@@ -1,17 +1,18 @@
 
 QTVERSION=5
-
 MOC_DEFINES=
-DEFINES=-fPIC
-INCPATH=`pkg-config Qt5Gui Qt5Widgets --cflags`
+
+CXX=g++
+CPPFLAGS=-fPIC `pkg-config Qt5Gui Qt5Widgets --cflags`
+CXXFLAGS=-std=c++11 -g -O0
 LIBS=`pkg-config Qt5Gui Qt5Widgets --libs`
 
-SRC=main.cc mach85.cc ioINTERNAL.cc bitmap.cc moc_mainwindow.cpp moc_crtwidget.cpp mainwindow.cc bitmap_qt.cc tape.cc
+OBJS=main.o mach85.o ioINTERNAL.o bitmap.o moc_mainwindow.o moc_crtwidget.o mainwindow.o bitmap_qt.o tape.o
 HEADERS=main.hh mach85.hh ioINTERNAL.hh bitmap.h mainwindow.h crtwidget.h ui_mainwindow.h bitmap_qt.h tape.h
 
 
-hp85emu: $(SRC) $(HEADERS)
-	g++ -O0 -g -std=c++11 $(INCPATH) $(DEFINES) $(SRC) -o hp85emu $(LIBS)
+hp85emu: $(OBJS) $(HEADERS)
+	g++ $(OBJS) -o hp85emu $(LIBS)
 
 all: hp85emu
 
@@ -20,9 +21,13 @@ clean:
 	rm -f *~
 	rm -f moc_*
 	rm -f ui_*
+	rm -f *.o
 
-moc_%.cpp: %.h
+moc_%.cc: %.h
 	moc -qt=$(QTVERSION) $(MOC_DEFINES) $(INCPATH) $< -o $@
 
 ui_%.h: %.ui
 	uic -qt=$(QTVERSION) $< -o $@
+
+%.o: %.cc
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
