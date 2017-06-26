@@ -41,9 +41,15 @@ const Environment* getEnvironment()
 }
 
 
+std::string Environment_Linux::getEmulatorFilesPath() const
+{
+  return "../"; // TODO
+}
+
+
 FILE* Environment_Linux::openEmulatorFile(std::string path) const
 {
-  std::string fullPath = "../";
+  std::string fullPath = "../"; // TODO
   fullPath += path;
 
   return fopen(fullPath.c_str(), "rb");

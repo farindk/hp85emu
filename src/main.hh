@@ -22,6 +22,7 @@ class Environment
 public:
   virtual ~Environment() { }
 
+  virtual std::string getEmulatorFilesPath() const = 0;
   virtual FILE* openEmulatorFile(std::string path) const = 0;
 
   virtual uint32_t getTicks() const = 0;
@@ -31,6 +32,7 @@ public:
 class Environment_Linux : public Environment
 {
 public:
+  virtual std::string getEmulatorFilesPath() const;
   virtual FILE* openEmulatorFile(std::string path) const;
 
   virtual uint32_t getTicks() const;

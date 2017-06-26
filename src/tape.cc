@@ -32,23 +32,29 @@ void TapeDrive::InitTape()
   // LoadTape();
 }
 
-#if TODO
+
 //*********************************************************************
-void WriteTape()
+void Tape::Save(std::string newFilename)
 {
+  // if no new filename was supplied, use old filename
 
-  long	hFile;
+  if (newFilename.empty()) {
+    newFilename = mFilename;
+  }
+  else {
+    mFilename = newFilename;
+  }
 
-  // update TAPPOS and write TAPE file
-  sprintf(FilePath, "TAPES\\%s", CurTape);
-  if( -1 != (hFile=Kopen(FilePath, O_WRBINNEW)) ) {
+
+  FILE* fh = fopen(mFilename.c_str(), "rb");
+  if (fh) {
     TAPBUF[0][0] = TAPREV;	// update tape design revision#
-    *((DWORD *)&TAPBUF[0][2]) = TAPPOS;	// save tape "position"
-    Kwrite(hFile, (BYTE *)TAPBUF, sizeof(TAPBUF));	// write to disk any changes to the tape
-    Kclose(hFile);
+    *((uint32_t*)&TAPBUF[0][2]) = TAPPOS;	// save tape "position"
+    fwrite(TAPBUF, 1, sizeof(TAPBUF), fh); // write to disk any changes to the tape
+    fclose(fh);
   }
 }
-#endif
+
 
 //*********************************************************************
 void TapeDrive::EjectTape()
@@ -162,7 +168,9 @@ BOOL GetTapeWriteProtect(char *tapename)
   }
   return FALSE;
 }
+#endif
 
+#if TODO
 //*****************************************************************
 // Changes the state of the WRITE-PROTECT tab on a tape cartridge
 void SetTapeWriteProtect(char *tapename, BOOL wp)
@@ -198,7 +206,9 @@ void SetTapeWriteProtect(char *tapename, BOOL wp)
     }
   }
 }
+#endif
 
+#if TODO
 #define	DEBUG_TAPSTS	0
 //*****************************************************************
 void DrawTapeStatus(PBMB hBM, long tx, long ty)

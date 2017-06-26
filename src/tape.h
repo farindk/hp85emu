@@ -40,7 +40,7 @@ class Tape
   void New();
 
   bool Load(std::string filename);
-  void Save(std::string newFilename = "") { } // TODO
+  void Save(std::string newFilename = "");
 
   uint16_t read(int head) { return TAPBUF[head][TAPPOS]; }
   void     write(int head, uint16_t data) { TAPBUF[head][TAPPOS] = data; }
@@ -78,6 +78,8 @@ class TapeDrive : public Peripheral
   bool LoadTape(); // TODO: remove me
   void InsertTape(std::shared_ptr<Tape> tape);
   void EjectTape();
+
+  std::shared_ptr<Tape> getTape() { return mTape; }
 
   void setTapeStatusChangedCallback(std::function<void(TapeDrive&)> f) { mOnTapeStatusChanged=f; }
 
