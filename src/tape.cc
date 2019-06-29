@@ -385,6 +385,7 @@ void TapeDrive::SetTapeStatus()
   if( (IO_TAPCTL & 0006)==0006 ) {
     if( !(td & TAP_GAP) ) IO_TAPSTS &= ~0040;
     else IO_TAPSTS |= 0040;
+    
     if( td==0 ) IO_TAPSTS = (IO_TAPSTS & 0111);
   }
 }
@@ -516,7 +517,8 @@ uint8_t TapeDrive::readTAPSTS()
 // 177411 TAPDAT
 void TapeDrive::writeTAPDAT(uint8_t val)
 {
-  BYTE	i, w;
+  uint16_t i;
+  BYTE w;
 
   if( mMachine->getModel()<2 ) {
     i = IO_TAPDAT = val;
